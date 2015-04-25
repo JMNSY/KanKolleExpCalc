@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>Kantai Collection Exp Calc</title>
+	<style>
+		div{text-align:center;}
+		table{margin:0 auto;}
+		td{color:#1E1E1E;}
+		td>span{text-align:left;}
+	</style>
+	<script language="javascript" src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+	<!--<script>alert(mapExp)</script>
+		功能写在这里
+		1.输入次数和海域以及战斗结果，计算该次数后的等级
+		2.输入海域和战斗结果以及目标等级，计算到该等级需要的战斗场数
+		-->
+	<script type="text/javascript">
+	
+	var expTab = [0,100,300,600,1000,1500,2100,2800,3600,4500,5500,6600,7800,9100,10500,12000,13600,15300,17100,19000,21000,23100,25300,27600,30000,32500,35100,37800,40600,43500,46500,49600,52800,56100,59500,63000,66600,70300,74100,78000,82000,86100,90300,94600,99000,103500,108100,112800,117600,122500,127500,132700,138100,143700,149500,155500,161700,168100,174700,181500,188500,195800,203400,211300,219500,228000,236800,245900,255300,265000,275000,285400,296200,307400,319000,331000,343400,356200,369400,383000,397000,411500,426500,442000,458000,474500,491500,509000,527000,545500,564500,584500,606500,631500,661500,701500,761500,851500,1000000,1000000,1010000,1011000,1013000,1016000,1020000,1025000,1031000,1038000,1046000,1055000,1065000,1077000,1091000,1107000,1125000,1145000,1168000,1194000,1223000,1255000,1290000,1329000,1372000,1419000,1470000,1525000,1584000,1647000,1714000,1785000,1860000,1940000,2025000,2115000,2210000,2310000,2415000,2525000,2640000,2760000,2887000,3021000,3162000,3310000,3465000,3628000,3799000,3978000,4165000,4360000];var mapExp = [[30,45,60,90],[50,75,100,150],[80,120,160,240],[100,150,200,300],[150,225,300,450],[120,180,240,360],[150,225,300,450],[200,300,400,600],[300,450,600,900],[250,375,500,750],[310,465,620,930],[320,480,640,960],[330,495,660,990],[350,525,700,1050],[400,600,800,1200],[310,465,620,930],[320,480,640,960],[330,495,660,990],[340,510,680,1020],[360,540,720,1080],[380,570,760,1140],[400,600,800,1200],[420,630,840,1260],[450,675,900,1350],[380,570,760,1140],[420,630,840,1260]];
+	$(document).ready(function() {
+		$(".info").hide();
+		$(".CountValue").hide();
+		//按钮绑定计算方法
+		$("#count").bind("click",calc);
+		//输入回车时执行计算方法，绑定body确保在任何元素按回车都可以计算
+		$("body").bind("keydown",function(e){
+			var key = e.which;
+			if(key == 13){
+				calc();
+			}
+		});
+	});
+	function calc(){
+		$(".CountValue").hide();
+		$(".info").hide();
+		$(".hideBr").hide();
+		var battleExp = mapExp[$("#areaIndex").val()][$("#expIndex").val()] * $("#expLevel").val();
+		var hasNotValue = 0;
+		var expToTarget = 0;
+		var expToTargetTimes = 0;
+		var levelAfterTimes = 0;
+		var expAfterTimes = 0;
+		var printStr = new Array();
+		printStr[3] = battleExp;
+		if($("#level").val() == ""){
+			alert("请输入舰娘当前等级！");
+			return;
+		}
+		if($("#expTNL").val() == ""){
+			alert("请输入舰娘距离下一等级的经验值！");
+			return;
+		}
+		printStr[0] = parseInt(expTab[$("#level").val()] - parseInt($("#expTNL").val()));
+		if($("#toLevel").val() == ""){
+			hasNotValue += 1;
+		}
+		else{
+			expToTarget = expTab[$("#toLevel").val() - 1]-expTab[$("#level").val()] + parseInt($("#expTNL").val());
+			expToTargetTimes = Math.ceil(expToTarget / (battleExp * 1.0));
+			printStr[1] = $("#toLevel").val() ;
+			printStr[2] = expToTarget ;
+			printStr[4] = expToTargetTimes;
+		}
+		if($("#times").val() == ""){
+			hasNotValue += 1;
+		}
+		else{
+			expAfterTimes = expTab[$("#level").val()] - parseInt($("#expTNL").val()) + (battleExp * $("#times").val());
+			for(var i = $("#level").val();expTab[i] <= expAfterTimes;i++){
+				levelAfterTimes = i;
+			}
+			printStr[5] = $("#times").val();
+			printStr[6] = expAfterTimes;
+			printStr[7] = levelAfterTimes;
+		}
+		console.log(printStr);
+		for(var str in printStr){
+			var thisId = "#Value" + str;
+			var temp = $(thisId).text(printStr[str]).css("color","blue").show();
+			temp.prev().show();
+			temp.next().show();
+		}
+		$("#Value2").css("color","red");
+		if(hasNotValue > 1){
+			alert("请输入舰娘目标等级或战斗场数！");
+			return;
+		}
+
+	}
+	</script>
+</head>
+<body>
+	<table width="250px">
+		<tr>
+			<td><span >战斗评价：</span></td>
+			<td>
+					<select name="expLevel" id="expLevel">
+					<option value="1.2">S胜</option>
+					<option value="1.0">A胜</option>
+					<option value="1.0">B胜</option>
+					<option value="0.8">C败</option>
+					<option value="0.7">D败</option>
+					<option value="0.5">E败</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><span >基础值：</span></td>
+			<td>
+				<select name="expIndex" id="expIndex">
+					<option value="3">旗舰+MVP</option>
+					<option value="2">MVP</option>
+					<option value="1">旗舰</option>
+					<option value="0">基础</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><span >海域：</span></td>
+			<td>
+				<select name="areaIndex" id="areaIndex">
+					<option value="0">1-1</option>
+					<option value="1">1-2</option>
+					<option value="2">1-3</option>
+					<option value="3">1-4</option>
+					<option value="4">1-5</option>
+					<option value="5">2-1</option>
+					<option value="6">2-2</option>
+					<option value="7">2-3</option>
+					<option value="8">2-4</option>
+					<option value="9">2-5</option>
+					<option value="10">3-1</option>
+					<option value="11">3-2</option>
+					<option value="12">3-3</option>
+					<option value="13">3-4</option>
+					<option value="14">3-5</option>
+					<option value="15">4-1</option>
+					<option value="16">4-2</option>
+					<option value="17">4-3</option>
+					<option value="18">4-4</option>
+					<option value="19">5-1</option>
+					<option value="20">5-2</option>
+					<option value="21">5-3</option>
+					<option value="22">5-4</option>
+					<option value="23">5-5</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<div class="inputdata">
+		<input type="text" placeholder="舰娘当前等级，必填" size="30" id="level" /><br />
+		<input type="text" placeholder="舰娘距离下一级的经验，必填" size="30" id="expTNL" /><br />
+		<input type="text" placeholder="舰娘目标等级，该项和战斗场数选填一项" size="30" id="toLevel" /><br />
+		<input type="text" placeholder="战斗场数，该项和舰娘目标等级选填一项" size="30" id="times" /><br />
+		<input type="button" value="计算" id="count" /><br />
+	</div>
+	<div>
+		<span class="info">舰娘当前经验共计：</span><span id="Value0" class="CountValue"></span><br class="hideBr"/>
+		<span class="info">距离</span><span id="Value1" class="CountValue"></span>
+			<span class="info">级还需经验：</span><span id="Value2" class="CountValue"></span><br class="hideBr"/>
+		<span class="info">每场战斗获得的经验为：</span><span id="Value3" class="CountValue"></span><br class="hideBr"/>
+		<span class="info">需要的战斗次数为：</span><span id="Value4" class="CountValue"></span><br class="hideBr"/>
+		<span/><span id="Value5" class="CountValue"></span><span class="info">次战斗之后经验为：</span><span id="Value6" class="CountValue"></span>
+			<span class="info">，等级为：</span><span id="Value7" class="CountValue"></span><br class="hideBr"/>
+	</div>
+</body>
+</html>
